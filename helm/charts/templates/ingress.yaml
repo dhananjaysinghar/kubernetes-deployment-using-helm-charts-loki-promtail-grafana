@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.deploymentName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    website: {{ .Values.deploymentName }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 25m
+    nginx.ingress.kubernetes.io/whitelist-source-range:  {{ .Values.IP_WHITELIST_RANGE }}
+
+spec:
+  rules:
+    - host: {{ .Values.hostName }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.deploymentName }}
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - {{ .Values.hostName }}
+      secretName: tls-wildcard-test-app.com
+

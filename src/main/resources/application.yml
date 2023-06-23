@@ -1,0 +1,37 @@
+#FILE_PATH: /Users/dhananjaya.singhar/Documents/GitHub/test-app/src/main/resources/index.html
+
+spring:
+  application:
+    name: TestApplication
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      maximum-expected-value:
+        http.server.requests: 1s
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      show-values: ALWAYS
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+      metrics:
+        enabled: true
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: diskSpace,ping
+          show-details: always
+        readiness:
+          include: "readinessState,diskSpace,ping"
+          show-details: always
+    metrics:
+      enabled: true

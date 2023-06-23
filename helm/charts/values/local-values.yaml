@@ -1,0 +1,12 @@
+deploymentName: test-app-local
+hostName: test-app.local.test.com
+replicaCount: 1
+imageSecret: dummy
+imageName: dhananjayasinghar/test-app:latest
+namespace: local
+env: local
+IP_WHITELIST_RANGE: 0.0.0.0/0
+
+configMap:
+  data:
+    FILE_PATH: /usr/share/html/index.html

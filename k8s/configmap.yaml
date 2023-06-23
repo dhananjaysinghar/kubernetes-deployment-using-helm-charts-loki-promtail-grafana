@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cfgmap
+data:
+  file-from-cfgmap: |
+    <!DOCTYPE html>
+    <html>
+        <body>
+            <h1 style="background-color:DodgerBlue;">Hello World</h1>
+        </body>
+    </html>

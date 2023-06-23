@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    product: TestApplication
+  name: test-app
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: test-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: test-app
+        env: local
+    spec:
+      containers:
+        - name: test-app
+          image: dhananjayasinghar/test-app:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: mnt
+              mountPath: /usr/share/html/index.html
+              subPath: file-from-cfgmap
+          env:
+            - name: APP_NAME
+              value: test-app
+            - name: FILE_PATH
+              value: /usr/share/html/index.html
+      volumes:
+        - name: mnt
+          configMap:
+            name: nginx-cfgmap

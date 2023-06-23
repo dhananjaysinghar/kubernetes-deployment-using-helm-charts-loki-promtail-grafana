@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deploymentName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    product: TestApplication
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      release: {{ .Values.deploymentName }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        release: {{ .Values.deploymentName }}
+        product: TestApplication
+        env: {{ .Values.env }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageSecret }}
+      containers:
+        - name: {{ .Values.deploymentName }}
+          image: {{ .Values.imageName }}
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PROFILE
+              value: {{ .Values.env }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.deploymentName }}-configmap
+          volumeMounts:
+            - name: index-mount
+              mountPath: /usr/share/html/
+              readOnly: true
+      volumes:
+        - name: index-mount
+          secret:
+            secretName: {{ .Values.deploymentName }}-secret
